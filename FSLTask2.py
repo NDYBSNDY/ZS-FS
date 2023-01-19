@@ -70,7 +70,6 @@ def loadDataSet(dsname):
     dataset = _load_pickle2(_datasetFeaturesFiles2[dsname]) #此时dataset与output相同
     Semset = _load_pickle2(_datasetFeaturesFiles2[dssem])
 
-    # 取每类中最小图片数作为类数
     # Computing the number of items per class in the MSD
     _min_examples = dataset["labels"].shape[0]
 
@@ -89,7 +88,6 @@ def loadDataSet(dsname):
         indices = torch.where(labels != labels[0])[0]
         labels = labels[indices]
 
-    #对语义向量进行处理
     _min_examples1 = Semset["labels"].shape[0]
 
     for i in range(Semset["labels"].shape[0]):
@@ -137,7 +135,6 @@ def GenerateRun(iRun, cfg, regenRState=False, generate=True):
             dataset[i] = data[classes[i], shuffle_indices,:][:cfg['shot']]
             Semset[i] = semantics[classes[i], shuffle_indices1, :][:cfg['sem']]
 
-    # 合并语义与支持集+查询集数组
     if generate:
         SDset = torch.zeros(
             (cfg['ways'], cfg['sem']+cfg['shot'], data.shape[2]))
@@ -190,7 +187,6 @@ def GenerateRunSet(start=None, end=None, cfg=None):
     setRandomStates(cfg)
 
 
-    #(1000,5,16,640)
     dataset = torch.zeros(
         (end-start, cfg['ways'], cfg['sem']+cfg['shot'], data.shape[2]))
     for iRun in range(end-start):

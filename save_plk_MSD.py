@@ -49,10 +49,11 @@ def load_pickle(file):
         return pickle.load(f)
 
 
-def extract_feature(val_loader, model, checkpoint_dir, tag='all'):
+def extract_feature(val_loader, model, checkpoint_dir, tag='last'):
     save_dir = '{}/{}'.format(checkpoint_dir, tag)
-    if os.path.isfile(save_dir + '/output111.plk'):
-        data = load_pickle(save_dir + '/output111.plk')
+    #判断是否存在 存在不生成
+    if os.path.isfile(save_dir + '/output.plk'):
+        data = load_pickle(save_dir + '/output.plk')
         return data
     else:
         if not os.path.isdir(save_dir):
@@ -74,23 +75,21 @@ def extract_feature(val_loader, model, checkpoint_dir, tag='all'):
                 output_dict[label.item()].append(out)
 
         all_info = output_dict
-        print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&打印生成前的数据&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-        print(all_info)
-        save_pickle(save_dir + '/output111.plk', all_info)
+        save_pickle(save_dir + '/output.plk', all_info)
         return all_info
 
 
 if __name__ == '__main__':
-    #生成总特征用于zslgan
     params = parse_args('test')
 
     loadfile = configs.data_dir[params.dataset] + 'novel.json'
 
-    if params.dataset == 'MSD':  # or params.Aluminum == 'CUB':params.Aluminum == 'Aluminum'
+    if params.dataset == 'MSD':  # or params.Aluminum == 'MSD':params.Aluminum == 'Aluminum'
         datamgr = SimpleDataManager(84, batch_size=256)
 
     novel_loader = datamgr.get_data_loader(loadfile, aug=False)
 
+    # checkpoint_dir = '%s/checkpoints/%s/%s_%s' % (configs.save_dir, params.Aluminum, params.model, params.method)
     checkpoint_dir = '%s/checkpoints/%s/%s_%s' % (configs.save_dir, params.dataset, params.model, params.method)
     modelfile = get_resume_file(checkpoint_dir)
 
@@ -116,5 +115,6 @@ if __name__ == '__main__':
     model_dict_load.update(state)
     model.load_state_dict(model_dict_load)
     model.eval()
-    output_dict = extract_feature(novel_loader, model, checkpoint_dir, tag='all')
+    output_dict = extract_feature(novel_loader, model, checkpoint_dir, tag='last')
+    print("保存路径：", checkpoint_dir)
     print("features saved!")

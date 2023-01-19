@@ -11,9 +11,9 @@ def saveDAGM():
         unlabels2 = labels[:, 700:]
         unfeatures3 = features[:700, :]
         unlabels3 = labels[:, :700]
-        # 生成不可见类按序语义
+        # unseen
         savemat("checkpoints/DAGM/WideResNet28_10_S2M2_R/last/Fsem_2.mat", {'features': unfeatures2, 'labels': unlabels2})
-        # 生成可见类按序语义
+        # seen
         savemat("checkpoints/DAGM/WideResNet28_10_S2M2_R/last/Fsem.mat", {'features': unfeatures3, 'labels': unlabels3})
 # saveDAGM()
 def saveKTH():
@@ -27,9 +27,9 @@ def saveKTH():
         unlabels2 = labels[:, 700:]
         unfeatures3 = features[:700, :]
         unlabels3 = labels[:, :700]
-        # 生成不可见类按序语义
+        # unseen
         savemat("checkpoints/KTH/WideResNet28_10_S2M2_R/last/Fsem_2.mat", {'features': unfeatures2, 'labels': unlabels2})
-        # 生成可见类按序语义
+        # seen
         savemat("checkpoints/KTH/WideResNet28_10_S2M2_R/last/Fsem.mat", {'features': unfeatures3, 'labels': unlabels3})
 #saveKTH()
 def saveKTD():
@@ -43,9 +43,9 @@ def saveKTD():
         unlabels2 = labels[:, 1500:]
         unfeatures3 = features[:1500, :]
         unlabels3 = labels[:, :1500]
-        # 生成不可见类按序语义
+        # unseen
         savemat("checkpoints/KTD/WideResNet28_10_S2M2_R/last/Fsem_2.mat", {'features': unfeatures2, 'labels': unlabels2})
-        # 生成可见类按序语义
+        # seen
         savemat("checkpoints/KTD/WideResNet28_10_S2M2_R/last/Fsem.mat", {'features': unfeatures3, 'labels': unlabels3})
 # saveKTD()
 def saveMSD():
@@ -59,8 +59,8 @@ def saveMSD():
         unlabels2 = labels[:, 1500:]
         unfeatures3 = features[:1500, :]
         unlabels3 = labels[:, :1500]
-        # 生成不可见类按序语义
+        # unseen
         savemat("checkpoints/Aluminum/WideResNet28_10_S2M2_R/last/Fsem_2.mat", {'features': unfeatures2, 'labels': unlabels2})
-        # 生成可见类按序语义
+        # seen
         savemat("checkpoints/Aluminum/WideResNet28_10_S2M2_R/last/Fsem_3.mat", {'features': unfeatures3, 'labels': unlabels3})
 saveMSD()

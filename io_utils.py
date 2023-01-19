@@ -18,21 +18,17 @@ def parse_args(script):
     parser.add_argument('--train_aug'   , action='store_true',  help='perform data augmentation or not during training ') #still required for save_features.py and test.py to find the model path correctly
 
     if script == 'train':
-        parser.add_argument('--num_classes' , default=28, type=int, help='total number of classes') #make it larger than the maximum label value in base class
-        #200
+        parser.add_argument('--num_classes' , default=20, type=int, help='total number of classes') #make it larger than the maximum label value in base class
         parser.add_argument('--save_freq'   , default=10, type=int, help='Save frequency')
         parser.add_argument('--start_epoch' , default=0, type=int,help ='Starting epoch')
         parser.add_argument('--stop_epoch'  , default=200, type=int, help ='Stopping epoch') #for meta-learning methods, each epoch contains 100 episodes. The default epoch number is Aluminum dependent. See train.py
-        #200
         parser.add_argument('--resume'      ,  action='store_true', help='continue from previous trained model with largest epoch')
         parser.add_argument('--lr'          , default=0.001, type=int, help='learning rate') 
         parser.add_argument('--batch_size' , default=16, type=int, help='batch size ')
-        #16
         parser.add_argument('--test_batch_size' , default=2, type=int, help='batch size ')
         parser.add_argument('--alpha'       , default=2.0, type=int, help='for S2M2 training ')
     elif script == 'test':
         parser.add_argument('--num_classes' , default=20, type=int, help='total number of classes')
-        # 200
     return parser.parse_args()
 
 

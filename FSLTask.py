@@ -11,7 +11,7 @@ def countCos(v1, v2):
     s1 = np.zeros((100,))
     for i in range(0, 100):
         v3 = v2[i, :]
-        s1[i] = cosine(v1, v3) #越小相似度越高
+        s1[i] = cosine(v1, v3)
     ordered = sorted(range(len(s1)), key=lambda k: s1[k])
     return ordered
 
@@ -25,7 +25,6 @@ _datasetFeaturesFiles2 = {"MSD": "./checkpoints/MSD/WideResNet28_10_S2M2_R/last/
                           }
 
 _cacheDir = "./cache"
-# _maxRuns = 10000
 _maxRuns = 1000
 _min_examples = -1
 
@@ -69,7 +68,7 @@ def loadDataSet(dsname, cfg):
     # Loading data from files on computer
     # home = expanduser("~")
     print("name_________________", _datasetFeaturesFiles2[dsname])
-    dataset = _load_pickle2(_datasetFeaturesFiles2[dsname]) #此时dataset与output相同
+    dataset = _load_pickle2(_datasetFeaturesFiles2[dsname])
     if (dsname == "DAGM" or dsname == "KTH"):
         # ways = 10
         ways = 7
@@ -78,7 +77,6 @@ def loadDataSet(dsname, cfg):
         ways = 15
     Semset = filter_sem.dealSem(cfg['shot'], dsname, ways)
     print("_____________________________>>>>>>>>", dataset["data"].shape[0])
-    # 取每类中最小图片数作为类数
     # Computing the number of items per class in the MSD
     _min_examples = dataset["labels"].shape[0]
     print("_min_exaples",_min_examples)
@@ -86,7 +84,7 @@ def loadDataSet(dsname, cfg):
         if torch.where(dataset["labels"] == dataset["labels"][i])[0].shape[0] > 0:
             _min_examples = min(_min_examples, torch.where(
                 dataset["labels"] == dataset["labels"][i])[0].shape[0])
-    print("Guaranteed number of items per class: {:d}\n".format(_min_examples)) #取得每类中图片最小值
+    print("Guaranteed number of items per class: {:d}\n".format(_min_examples))
     # Generating data tensors
     data = torch.zeros((0, _min_examples, dataset["data"].shape[1]))
     labels = dataset["labels"].clone()
@@ -99,14 +97,14 @@ def loadDataSet(dsname, cfg):
     print("Total of {:d} classes, {:d} elements each, with dimension {:d}\n".format(
         data.shape[0], data.shape[1], data.shape[2]), data.shape)
 
-    #对语义向量进行处理
+
     _min_examples1 = Semset["labels"].shape[0]
     print("_min_exaples", _min_examples1)
     for i in range(Semset["labels"].shape[0]):
         if torch.where(Semset["labels"] == Semset["labels"][i])[0].shape[0] > 0:
             _min_examples1 = min(_min_examples1, torch.where(
                 Semset["labels"] == Semset["labels"][i])[0].shape[0])
-    print("Guaranteed number of sem per class: {:d}\n".format(_min_examples1))  # 取得每类中图片最小值
+    print("Guaranteed number of sem per class: {:d}\n".format(_min_examples1))
     if (cfg['shot'] == 0):
         sem = 4
     else:
@@ -127,8 +125,8 @@ def GenerateRun(iRun, cfg, regenRState=False, generate=True):
     if not regenRState:
         np.random.set_state(_randStates[iRun])
 
-    classes = np.random.permutation(np.arange(data.shape[0]))[:cfg["ways"]] #第一个run从20类中随机取5类进行分类
-    shuffle_indices = np.arange(_min_examples) #从0到_min_examples的图标
+    classes = np.random.permutation(np.arange(data.shape[0]))[:cfg["ways"]]
+    shuffle_indices = np.arange(_min_examples)
     shuffle_indices1 = np.arange(_min_examples1)
     dataset = None
     Semset = None
@@ -137,9 +135,9 @@ def GenerateRun(iRun, cfg, regenRState=False, generate=True):
         Semset = torch.zeros(
             (cfg['ways'], sem, semantics.shape[2]))
         dataset = torch.zeros(
-            (cfg['ways'], cfg['shot']+cfg['queries'], data.shape[2]))#[5,16,640]
+            (cfg['ways'], cfg['shot']+cfg['queries'], data.shape[2]))
     for i in range(cfg['ways']):
-        shuffle_indices = np.random.permutation(shuffle_indices) #打乱图片顺序
+        shuffle_indices = np.random.permutation(shuffle_indices)
         shuffle_indices1 = np.random.permutation(shuffle_indices1)
         if generate:
             dataset[i] = data[classes[i], shuffle_indices, :][:cfg['shot']+cfg['queries']]
@@ -151,15 +149,8 @@ def GenerateRun(iRun, cfg, regenRState=False, generate=True):
 
     for i in range(cfg['ways']):
         if generate:
-            # 拼凑语义加入支持集
             SDset[i] = torch.cat([Semset[i], dataset[i]], axis=0)
     dataset = SDset
-    #测试 对所有类用自注意力
-    # import SelfAttention
-    # C = 640
-    # num_head = 8
-    # MHSA = SelfAttention.MultiHead_SelfAttention(C, num_head)
-    # dataset = MHSA(dataset)
     return dataset
 
 
@@ -204,7 +195,6 @@ def GenerateRunSet(start=None, end=None, cfg=None):
     setRandomStates(cfg)
     print("generating task from {} to {}".format(start, end))
 
-    #(1000,5,16,640)
     dataset = torch.zeros(
         (end-start, cfg['ways'], sem+cfg['shot']+cfg['queries'], data.shape[2]))
     for iRun in range(end-start):

@@ -128,10 +128,6 @@ class distribution_Gaussian(Model):
         p_xj = torch.zeros_like(dist)
         r = torch.ones(n_runs, n_usamples)
         c = torch.ones(n_runs, n_ways) * n_queries
-        # p_xj_test, _ = self.OPT(dist[:, n_lsamples:], r, c, epsilon=1e-6)
-        # p_xj[:, n_lsamples:] = p_xj_test
-        # p_xj[:, :n_lsamples].fill_(0)
-        # p_xj[:, :n_lsamples].scatter_(2, labels[:, :n_lsamples].unsqueeze(2), 1)
         p_xj_test, _ = self.OPT(dist[:, n_wsamples:], r, c, epsilon=1e-6)
         p_xj[:, n_wsamples:] = p_xj_test
         p_xj[:, :n_wsamples].fill_(0)
@@ -159,17 +155,6 @@ class MAP:
         olabels = probas.argmax(dim=2)
         matches = labels.eq(olabels).float()
         acc_test = matches[:, n_lsamples:].mean(1)
-        # acc_test = matches[:, n_lsamples+20:].mean(1)
-        # acc_test = matches[:, n_wsamples:].mean(1)
-        # 保存标签
-        pre = olabels[:, 50:]
-        pre = np.array(pre).reshape(5000)
-        lab = olabels[:, :5]
-        lab = np.array(lab).reshape(5000)
-        f = open('111.csv', 'w', encoding='utf-8')
-        csv1 = csv.writer(f)
-        csv1.writerow(lab)
-        f.close()
 
         m = acc_test.mean().item()
         pm = acc_test.std().item() * 1.96 / math.sqrt(n_runs)

@@ -5,14 +5,10 @@ import os
 import json
 import random
 
-cwd = os.getcwd() 
-# data_path = join(cwd,'Aluminum')
-data_path = join(cwd,'Aluminum')
+cwd = os.getcwd()
+data_path = join(cwd,'MSD')
 savedir = './'
 dataset_list = ['novel','base',"val"]
-
-#if not os.path.exists(savedir):
-#    os.makedirs(savedir)
 
 folder_list = [f for f in listdir(data_path) if isdir(join(data_path, f))]
 folder_list.sort()

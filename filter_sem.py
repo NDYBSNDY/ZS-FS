@@ -85,7 +85,7 @@ def graph_embedding(datas,k,kappa,alpha):
         F1[i, :, :] = E
     F1 = torch.nn.functional.softmax(F1, dim=2)
     return F1
-#取支持集和查询集分别进行归一化
+
 def ET(datas):
     datas[:, :n_wsamples] = datas[:, :n_wsamples, :] - datas[:, :n_wsamples].mean(1, keepdim=True)
     datas[:, :n_wsamples] = datas[:, :n_wsamples, :] / torch.norm(datas[:, :n_wsamples, :], 2, 2)[:, :, None]
@@ -111,9 +111,8 @@ class distribution_Gaussian(Model):
 
     def cuda(self):
         self.mus = self.mus.cuda()
-    #初始化标记数据支持集（总图片数 维数：1000,5,80）n_sem
+
     def initFromLabelledDatas(self):
-        # self.mus = ndatas.reshape(n_runs, n_shot+n_queries, n_ways, n_nfeat)[:, :n_shot, ].mean(1)
         self.mus = ndatas.reshape(n_runs, n_shot + n_sem, n_ways, n_nfeat)[:, :n_shot, ].mean(1)
     def updateFromEstimate(self, estimate, alpha):   
         
@@ -142,14 +141,14 @@ class distribution_Gaussian(Model):
     
     def getProbas(self):
         # compute squared dist to centroids [n_runs][n_samples][n_ways]
-        dist = (ndatas.unsqueeze(2)-self.mus.unsqueeze(1)).norm(dim=3).pow(2) #[1000, 100, 5][运行数 图片总数 类数]
-        p_xj = torch.zeros_like(dist) #[1000, 100, 5]
-        r = torch.ones(n_runs, n_usamples) #[1000, 75] 查询集
-        c = torch.ones(n_runs, n_ways) * n_sem #[1000, 5] 支持集
-        p_xj_test, _ = self.OPT(dist[:, n_wsamples:], r, c, epsilon=1e-6) #dist[:, n_wsamples:]，只包含查询集
-        p_xj[:, n_wsamples:] = p_xj_test #[1000, 75, 5]
+        dist = (ndatas.unsqueeze(2)-self.mus.unsqueeze(1)).norm(dim=3).pow(2)
+        p_xj = torch.zeros_like(dist)
+        r = torch.ones(n_runs, n_usamples)
+        c = torch.ones(n_runs, n_ways) * n_sem
+        p_xj_test, _ = self.OPT(dist[:, n_wsamples:], r, c, epsilon=1e-6)
+        p_xj[:, n_wsamples:] = p_xj_test
         p_xj[:, :n_wsamples].fill_(0)
-        p_xj[:, :n_wsamples].scatter_(2, labels[:, :n_wsamples].unsqueeze(2), 1) #为支持集添加labels
+        p_xj[:, :n_wsamples].scatter_(2, labels[:, :n_wsamples].unsqueeze(2), 1)
         return p_xj
 
     def estimateFromMask(self, mask):
@@ -172,8 +171,8 @@ class MAP:
     
     def getSem(self, probas):
         global dataName
-        olabels = probas.argmax(dim=2) #[1000, 100]
-        matches = labels.eq(olabels).float() #[1000, 100] #1000个轮次 每个轮次分类对的计算概率
+        olabels = probas.argmax(dim=2)
+        matches = labels.eq(olabels).float()
         fil = matches.reshape(n_samples,)
         fil = fil[n_lsamples:]
         dataSem = io.loadmat(dataFsem[dataName])
@@ -204,13 +203,12 @@ class MAP:
             lab = np.array(lab)
             # lab = lab.reshape(1, a)
             feat = np.array(feat)
-            # savemat("checkpoints/MSD/WideResNet28_10_S2M2_R/last/filter_sem/1_shot.mat",
-            #         {'features': feat, 'labels': lab})
+
         return lab, feat
     
     def performEpoch(self, model, epochInfo=None):
      
-        p_xj = model.getProbas() #p_xj：支持集标签 + 查询集合体
+        p_xj = model.getProbas()
         self.probas = p_xj
         
         if self.verbose:
@@ -255,14 +253,9 @@ def dealSem(shot, data, way):
     global ndatas, labels, n_shot, n_ways, n_sem, n_runs, n_lsamples, n_usamples, n_samples, k, kappa, n_nfeat, n_wsamples, dataName
     n_shot = shot
     n_ways = way
-    # 支持集图片总数
     n_lsamples = n_ways * n_shot
-    # 查询及图片总数
     n_usamples = n_ways * n_sem
-    # 支持集图片总数
     n_wsamples = n_lsamples
-    # Dnovel图片总数
-    # n_samples = n_lsamples + n_usamples
     dataName = data
     n_samples = n_usamples + n_wsamples
     alpha = 0.75
@@ -270,14 +263,12 @@ def dealSem(shot, data, way):
     cfg = {'sem': n_sem, 'shot': n_shot, 'ways': n_ways}
     FSLTask2.loadDataSet(data)
     FSLTask2.setRandomStates(cfg)
-    ndatas = FSLTask2.GenerateRunSet(cfg=cfg) # 打乱顺序取5类，打乱顺序取图片，每个run都不一样，生成需要运行的数据集[10000,5,16,640]
-    ndatas = ndatas.permute(0, 2, 1, 3).reshape(n_runs, n_samples, -1) # 转换数组形状[1000,80,640]
+    ndatas = FSLTask2.GenerateRunSet(cfg=cfg)
+    ndatas = ndatas.permute(0, 2, 1, 3).reshape(n_runs, n_samples, -1)
     # labels = torch.arange(n_ways).view(1, 1, n_ways).expand(n_runs, n_sem+n_shot+n_queries, 5).clone().view(n_runs, n_samples) #[1000,80]
     labels = torch.arange(n_ways).view(1, 1, n_ways).expand(n_runs, n_sem + n_shot, way).clone().view(n_runs, n_samples)  # [1000,100]
-    # print('labels', labels)
     beta = 0.5
     ndatas[:, ] = torch.pow(ndatas[:, ]+1e-6, beta)
-    #所有数据嵌入图
     ndatas = graph_embedding(ndatas, k=k, kappa=kappa, alpha=alpha)
     n_nfeat = ndatas.size(2)
 
@@ -290,7 +281,6 @@ def dealSem(shot, data, way):
 
     lam = 10
     model =distribution_Gaussian(n_ways, lam)
-    #聚类
     model.initFromLabelledDatas()
 
     alpha = 0.2
