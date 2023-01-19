@@ -22,9 +22,8 @@ use_gpu = torch.cuda.is_available()
 #      loading datas
 
 def scaleEachUnitaryDatas(datas):
-
     norms = datas.norm(dim=2, keepdim=True)
-    return datas/norms
+    return datas / norms
 
 
 def QRreduction(datas):
@@ -34,7 +33,7 @@ def QRreduction(datas):
     return ndatas
 
 
-def graph_embedding(datas,k,kappa,alpha):
+def graph_embedding(datas, k, kappa, alpha):
     n, m, z = datas.shape
     F1 = torch.zeros(n, m, m)
     ndatas_qr = torch.qr(datas.permute(0, 2, 1)).R
@@ -46,16 +45,16 @@ def graph_embedding(datas,k,kappa,alpha):
         S = torch.tensor(S)
         S = S - torch.eye(S.shape[0])
 
-        if k>0:
+        if k > 0:
             topk, indices = torch.topk(S, k)
             mask = torch.zeros_like(S)
             mask = mask.scatter(1, indices, 1)
-            mask = ((mask+torch.t(mask))>0).type(torch.float32)
-            S    = S*mask
+            mask = ((mask + torch.t(mask)) > 0).type(torch.float32)
+            S = S * mask
 
-        D       = S.sum(0)
-        Dnorm   = torch.diag(torch.pow(D, -0.5))
-        E   = torch.matmul(Dnorm, torch.matmul(S, Dnorm))
+        D = S.sum(0)
+        Dnorm = torch.diag(torch.pow(D, -0.5))
+        E = torch.matmul(Dnorm, torch.matmul(S, Dnorm))
         E = alpha * torch.eye(E.shape[0]) + E
         E = torch.matrix_power(E, kappa)
         E = E.cuda()
@@ -63,27 +62,25 @@ def graph_embedding(datas,k,kappa,alpha):
         F1[i, :, :] = E
     F1 = torch.nn.functional.softmax(F1, dim=2)
     return F1
-#取支持集和查询集分别进行归一化
+
+
 def ET(datas):
-    # datas[:, :n_lsamples] = datas[:, :n_lsamples, :] - datas[:, :n_lsamples].mean(1, keepdim=True)
-    # datas[:, :n_lsamples] = datas[:, :n_lsamples, :] / torch.norm(datas[:, :n_lsamples, :], 2, 2)[:, :, None]
-    # datas[:, n_lsamples:] = datas[:, n_lsamples:, :] - datas[:, n_lsamples:].mean(1, keepdim=True)
-    # datas[:, n_lsamples:] = datas[:, n_lsamples:, :] / torch.norm(datas[:, n_lsamples:, :], 2, 2)[:, :, None]
     datas[:, :n_wsamples] = datas[:, :n_wsamples, :] - datas[:, :n_wsamples].mean(1, keepdim=True)
     datas[:, :n_wsamples] = datas[:, :n_wsamples, :] / torch.norm(datas[:, :n_wsamples, :], 2, 2)[:, :, None]
     datas[:, n_wsamples:] = datas[:, n_wsamples:, :] - datas[:, n_wsamples:].mean(1, keepdim=True)
     datas[:, n_wsamples:] = datas[:, n_wsamples:, :] / torch.norm(datas[:, n_wsamples:, :], 2, 2)[:, :, None]
     return datas
 
+
 class Model:
     def __init__(self, n_ways):
         self.n_ways = n_ways
-              
+
 
 class distribution_Gaussian(Model):
     def __init__(self, n_ways, lam):
         super(distribution_Gaussian, self).__init__(n_ways)
-        self.mus = None         # shape [n_runs][n_ways][n_nfeat]
+        self.mus = None  # shape [n_runs][n_ways][n_nfeat]
         self.lam = lam
 
     def clone(self):
@@ -93,14 +90,16 @@ class distribution_Gaussian(Model):
 
     def cuda(self):
         self.mus = self.mus.cuda()
-    #初始化标记数据支持集（总图片数 维数：1000,5,80）n_sem
+
     def initFromLabelledDatas(self):
         # self.mus = ndatas.reshape(n_runs, n_shot+n_queries, n_ways, n_nfeat)[:, :n_shot, ].mean(1)
-        self.mus = ndatas.reshape(n_runs, n_sem+n_shot + n_queries, n_ways, n_nfeat)[:, :n_sem+n_shot, ].mean(1)
-    def updateFromEstimate(self, estimate, alpha):   
-        
+        self.mus = ndatas.reshape(n_runs, n_sem + n_shot + n_queries, n_ways, n_nfeat)[:, :n_sem + n_shot, ].mean(1)
+
+    def updateFromEstimate(self, estimate, alpha):
+
         Dmus = estimate - self.mus
         self.mus = self.mus + alpha * (Dmus)
+
     def OPT(self, M, r, c, epsilon=1e-6):
 
         r = r.cuda()
@@ -121,10 +120,9 @@ class distribution_Gaussian(Model):
             iters = iters + 1
         return P, torch.sum(P * M)
 
-    
     def getProbas(self):
         # compute squared dist to centroids [n_runs][n_samples][n_ways]
-        dist = (ndatas.unsqueeze(2)-self.mus.unsqueeze(1)).norm(dim=3).pow(2)
+        dist = (ndatas.unsqueeze(2) - self.mus.unsqueeze(1)).norm(dim=3).pow(2)
         p_xj = torch.zeros_like(dist)
         r = torch.ones(n_runs, n_usamples)
         c = torch.ones(n_runs, n_ways) * n_queries
@@ -139,18 +137,20 @@ class distribution_Gaussian(Model):
         emus = mask.permute(0, 2, 1).matmul(ndatas).div(mask.sum(dim=1).unsqueeze(2))
         return emus
 
-          
+
 # =========================================
 #    MAP
 # =========================================
 import csv
+
+
 class MAP:
     def __init__(self, alpha=None):
-        
+
         self.verbose = False
         self.progressBar = False
         self.alpha = alpha
-    
+
     def getAccuracy(self, probas):
         olabels = probas.argmax(dim=2)
         matches = labels.eq(olabels).float()
@@ -159,17 +159,17 @@ class MAP:
         m = acc_test.mean().item()
         pm = acc_test.std().item() * 1.96 / math.sqrt(n_runs)
         return m, pm
-    
+
     def performEpoch(self, model, epochInfo=None):
-     
+
         p_xj = model.getProbas()
         self.probas = p_xj
-        
+
         if self.verbose:
             print("accuracy from filtered probas", self.getAccuracy(self.probas))
-        
+
         m_estimates = model.estimateFromMask(self.probas)
-               
+
         # update centroids
         model.updateFromEstimate(m_estimates, self.alpha)
 
@@ -177,88 +177,72 @@ class MAP:
             op_xj = model.getProbas()
             acc = self.getAccuracy(op_xj)
             print("output model accuracy", acc)
-        
+
     def loop(self, model, n_epochs=20):
-        
+
         self.probas = model.getProbas()
         if self.verbose:
             print("initialisation model accuracy", self.getAccuracy(self.probas))
 
         if self.progressBar:
             if type(self.progressBar) == bool:
-                pb = tqdm(total = n_epochs)
+                pb = tqdm(total=n_epochs)
             else:
                 pb = self.progressBar
-           
-        for epoch in range(1, n_epochs+1):
+
+        for epoch in range(1, n_epochs + 1):
             if self.verbose:
                 print("----- epoch[{:3d}]  lr_p: {:0.3f}  lr_m: {:0.3f}".format(epoch, self.alpha))
             self.performEpoch(model, epochInfo=(epoch, n_epochs))
             if (self.progressBar): pb.update()
-        
+
         # get final accuracy and return it
         op_xj = model.getProbas()
         acc = self.getAccuracy(op_xj)
         return acc
-    
+
 
 if __name__ == '__main__':
-    n_shot = 5
+    n_shot = 0
     n_ways = 5
-    n_queries = 1
+    n_queries = 15
     # n_runs = 10000
     n_runs = 1000
-    #支持集图片总数
     n_lsamples = n_ways * n_shot
-    #查询及图片总数
     n_usamples = n_ways * n_queries
-    k=4
+    k = 4
     kappa = 1
     alpha = 0.75
     import FSLTask
+
     cfg = {'shot': n_shot, 'ways': n_ways, 'queries': n_queries}
     FSLTask.loadDataSet("MSD", cfg)
     n_sem = FSLTask.getSem(cfg)
-    # 语义+支持集图片总数
     n_wsamples = n_ways * n_sem + n_lsamples
-    # Dnovel图片总数
-    # n_samples = n_lsamples + n_usamples
     n_samples = n_usamples + n_wsamples
-    # FSLTask.loadDataSet("MSD")
     FSLTask.setRandomStates(cfg)
     print(cfg)
-    ndatas = FSLTask.GenerateRunSet(cfg=cfg) # 打乱顺序取5类，打乱顺序取图片，每个run都不一样，生成需要运行的数据集[10000,5,16,640]
-    ndatas = ndatas.permute(0, 2, 1, 3).reshape(n_runs, n_samples, -1) # 转换数组形状[1000,80,640]
+    ndatas = FSLTask.GenerateRunSet(cfg=cfg)
+    ndatas = ndatas.permute(0, 2, 1, 3).reshape(n_runs, n_samples, -1)
     # labels = torch.arange(n_ways).view(1, 1, n_ways).expand(n_runs, n_sem+n_shot+n_queries, 5).clone().view(n_runs, n_samples) #[1000,80]
-    labels = torch.arange(n_ways).view(1, 1, n_ways).expand(n_runs, n_sem + n_shot + n_queries, n_ways).clone().view(n_runs,n_samples)  # [1000,80]
-    # print('labels', labels)
+    labels = torch.arange(n_ways).view(1, 1, n_ways).expand(n_runs, n_sem + n_shot + n_queries, n_ways).clone().view(
+        n_runs, n_samples)  # [1000,80]
     beta = 0.5
-    ndatas[:, ] = torch.pow(ndatas[:, ]+1e-6, beta)
-    #所有数据嵌入图
+    ndatas[:, ] = torch.pow(ndatas[:, ] + 1e-6, beta)
     ndatas = graph_embedding(ndatas, k=k, kappa=kappa, alpha=alpha)
     n_nfeat = ndatas.size(2)
-
-    ndatas = scaleEachUnitaryDatas(ndatas)  # 改变数据范围
-
+    ndatas = scaleEachUnitaryDatas(ndatas)
     ndatas = ET(ndatas)
     # switch to cuda
     ndatas = ndatas.cuda()
     labels = labels.cuda()
-
     lam = 10
-    model =distribution_Gaussian(n_ways, lam)
-    #聚类
+    model = distribution_Gaussian(n_ways, lam)
     model.initFromLabelledDatas()
-
     alpha = 0.2
     optim = MAP(alpha)
-
-    optim.verbose=False
-    optim.progressBar=True
-
+    optim.verbose = False
+    optim.progressBar = True
     acc_test = optim.loop(model, n_epochs=20)
     print('acc_test', acc_test)
-    print("final accuracy found {:0.2f} +- {:0.2f}".format(*(100*x for x in acc_test)))
-    
-    
-
+    print("final accuracy found {:0.2f} +- {:0.2f}".format(*(100 * x for x in acc_test)))

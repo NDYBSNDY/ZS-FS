@@ -116,5 +116,5 @@ if __name__ == '__main__':
     model.load_state_dict(model_dict_load)
     model.eval()
     output_dict = extract_feature(novel_loader, model, checkpoint_dir, tag='last')
-    print("保存路径：", checkpoint_dir)
+    print("SavePath：", checkpoint_dir)
     print("features saved!")

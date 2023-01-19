@@ -113,9 +113,9 @@ def GenerateRun(iRun, cfg, regenRState=False, generate=True):
     if not regenRState:
         np.random.set_state(_randStates[iRun])
 
-    classes = np.random.permutation(np.arange(data.shape[0]))[:cfg["ways"]]#第一个run从20类中随机取5类进行分类
+    classes = np.random.permutation(np.arange(data.shape[0]))[:cfg["ways"]]
     classes = np.sort(classes)
-    shuffle_indices = np.arange(_min_examples) #从0到_min_examples的图标
+    shuffle_indices = np.arange(_min_examples)
     shuffle_indices1 = np.arange(_min_examples1)
     dataset = None
     Semset = None
@@ -124,9 +124,9 @@ def GenerateRun(iRun, cfg, regenRState=False, generate=True):
         Semset = torch.zeros(
             (cfg['ways'], cfg['sem'], semantics.shape[2]))
         dataset = torch.zeros(
-            (cfg['ways'], cfg['shot'], data.shape[2]))#[5,16,640]
+            (cfg['ways'], cfg['shot'], data.shape[2]))
     for i in range(cfg['ways']):
-        shuffle_indices = np.random.permutation(shuffle_indices) #打乱图片顺序
+        shuffle_indices = np.random.permutation(shuffle_indices)
         shuffle_indices1 = np.random.permutation(shuffle_indices1)
 
         shuffle_indices1 = np.sort(shuffle_indices1)

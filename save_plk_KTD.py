@@ -51,7 +51,6 @@ def load_pickle(file):
 
 def extract_feature(val_loader, model, checkpoint_dir, tag='last'):
     save_dir = '{}/{}'.format(checkpoint_dir, tag)
-    #判断是否存在 存在不生成
     if os.path.isfile(save_dir + '/output.plk'):
         data = load_pickle(save_dir + '/output.plk')
         return data
@@ -116,5 +115,5 @@ if __name__ == '__main__':
     model.load_state_dict(model_dict_load)
     model.eval()
     output_dict = extract_feature(novel_loader, model, checkpoint_dir, tag='last')
-    print("保存路径：", checkpoint_dir)
+    print("SavePath：", checkpoint_dir)
     print("features saved!")
