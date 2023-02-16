@@ -1,37 +1,4 @@
-# GT
+# Graph-based Sample Synthesizing Model for Few- and Zero-shot Compatible Surface Defect Classification in Smart Manufacturing
 
-#### 介绍
-总模型备份
-
-#### 软件架构
-软件架构说明
-
-
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+#### INTRODUCTION
+Surface defect classification exhibits great importance in improving the performance of manufacturing automation. Unlike general image classification which has massive training samples, defect samples are very rare or some are never seen before since smart manufacturing techniques have significantly avoided the normal defects. Effectively detecting the rare-seen and unseen surface defects thus become one of the most critical factors to further improve the performance of smart manufacturing. However, existing few-shot defect classification methods do not support predicting unseen defects while general zero-shot classification methods do work not well in manufacturing data environments. To this end, this paper proposes a novel few- and zero-shot compatible surface defect classification model for manufacturing defect detection. First, a novel Cycle-GAN model is proposed to synthesize defect visual features from the corresponding semantic features (text description about the defects) to augment the support samples. Then, a support and query sample fused graph is built to establish the potential relationships among support samples and query samples. After, a graph-based center feature updating method is proposed to match the query features to the corresponding class, including unseen classes. Massive experiments, including few- and zero-shot defect classification, on four real-world manufacturing datasets show the proposed method significantly surpasses previous state-of-the-art methods in all tasks. In highlights, our method has +4.9% improvements on the non-trivial dataset (MSD-Cls) for few-shot tasks, +3.5% improvements on cross-domain few-shot tasks and +3.5∼7.4% improvements on zero-shot tasks, compared with the state-of-the-art. Also, the proposed model is deployed on a prototype manufacturing scenario that further demonstrates the applicability of the work.
