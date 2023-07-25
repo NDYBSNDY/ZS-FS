@@ -6,12 +6,11 @@ Surface defect classification exhibits great importance in improving the perform
 ![image](https://user-images.githubusercontent.com/78714645/219296103-33ee52ca-c350-4bdf-8268-d35845395f07.png)
 
 #### Performance Evaluation Video
-Google Link https://drive.google.com/file/d/1OxZKZI3c7vXAGYem2TmhfVGpwgmEaxqA/view
-Baidu Link: https://pan.baidu.com/s/1kUjdzvZkZU98jZiIIY-yBw?pwd=pd2g 
-Password: pd2g
+# Google Link https://drive.google.com/file/d/1OxZKZI3c7vXAGYem2TmhfVGpwgmEaxqA/view
+# Baidu Link: https://pan.baidu.com/s/1kUjdzvZkZU98jZiIIY-yBw?pwd=pd2g Password: pd2g
 
 #### RESTful APIs
-
+![image](data/restapi.png)
 
 #### DATASETS
 datasets: Four real-world industrial defect datasets, MSD-Cls [10], DAGM [59], KTH [60], and KTD [61], areused for both few-shot and zero-shot tasks. MSD-Cls is a metal surface defect dataset that contains aluminum and steel with different defect types. DAGM is an industrial optical inspection dataset that mainly includes miscellaneous defects on various statistically textured backgrounds. KTH is a manufacturing texture dataset that consists of a small amount of sample data for each class in the texture image database KTH-TIPS [60] under different illumination, pose, and scale. KTD is a unique texture patch dataset about floor, wall, stone, grass, etc.
