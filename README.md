@@ -6,7 +6,7 @@ Surface defect classification exhibits great importance in improving the perform
 ![image](https://user-images.githubusercontent.com/78714645/219296103-33ee52ca-c350-4bdf-8268-d35845395f07.png)
 
 #### Performance Evaluation Video
-###### Google Link https://drive.google.com/file/d/1OxZKZI3c7vXAGYem2TmhfVGpwgmEaxqA/view
+###### Google Link: https://drive.google.com/file/d/1OxZKZI3c7vXAGYem2TmhfVGpwgmEaxqA/view
 ###### Baidu Link: https://pan.baidu.com/s/1kUjdzvZkZU98jZiIIY-yBw?pwd=pd2g Password: pd2g
 
 #### RESTful APIs
